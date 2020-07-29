@@ -13,7 +13,9 @@ import Distribution.PackageDescription.Parse
 import qualified Distribution.Verbosity as PD
 import qualified Distribution.Types.UnqualComponentName as PD
 import qualified Distribution.ModuleName as PD
-import Data.ByteString.Lazy.Char8 as BSL
+import qualified Data.ByteString.Lazy.Char8 as BSL
+
+import Data.List (intercalate)
 
 import Options.Applicative
 
@@ -51,8 +53,10 @@ queryTestNames = fmap testSuiteName' . PD.condTestSuites
 queryTestModules :: PD.GenericPackageDescription -> [String]
 queryTestModules gpd =
   let
+    moduleName' :: PD.ModuleName -> String
+    moduleName' = intercalate "." . PD.components
     testSuites' = fmap (PD.condTreeData . snd) . PD.condTestSuites
-    testModules' = fmap PD.toFilePath . PD.testModules
+    testModules' = fmap moduleName' . PD.testModules
   in
     foldMap testModules' $ testSuites' gpd
 
