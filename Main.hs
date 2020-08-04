@@ -53,12 +53,12 @@ queryTestNames = fmap testSuiteName' . PD.condTestSuites
 queryTestModules :: PD.GenericPackageDescription -> [String]
 queryTestModules gpd =
   let
-    moduleName' :: PD.ModuleName -> String
-    moduleName' = intercalate "." . PD.components
-    testSuites' = fmap (PD.condTreeData . snd) . PD.condTestSuites
-    testModules' = fmap moduleName' . PD.testModules
+    moduleName :: PD.ModuleName -> String
+    moduleName = intercalate "." . PD.components
+    testModules :: PD.GenericPackageDescription -> [String]
+    testModules = foldMap ((foldMap (fmap moduleName . PD.testModules)) . snd) . PD.condTestSuites
   in
-    foldMap testModules' $ testSuites' gpd
+    testModules gpd
 
 mkAesonQuery :: Query -> PD.GenericPackageDescription -> A.Value
 mkAesonQuery QueryTestNames   = A.toJSON . queryTestNames
